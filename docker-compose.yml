@@ -4,3 +4,13 @@ services:
     container_name: stats-server
     ports:
       - "9090:9090"
+
+  stats-db:
+    image: postgres:16.1
+    container_name: postgres-ewm-stats-db
+    ports:
+      - "6542:5432"
+
+  ewm-service:
+    ports:
+      - "8080:8080"
