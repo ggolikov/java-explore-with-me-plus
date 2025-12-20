@@ -12,6 +12,8 @@ services:
   stats-db:
     image: postgres:16.1
     container_name: postgres-ewm-stats-db
+    environment:
+      POSTGRES_PASSWORD: password
     ports:
       - "6542:5432"
 
