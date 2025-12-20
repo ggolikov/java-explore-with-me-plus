@@ -22,7 +22,7 @@ public class StatsClientImpl implements StatsClient {
 
     public StatsClientImpl(
             RestTemplate restTemplate,
-            @Value("${stats.service.url:http://localhost:9090}") String baseUrl
+            @Value("${stats.service.url}") String baseUrl
     ) {
         this.restTemplate = restTemplate;
         this.baseUrl = baseUrl;
