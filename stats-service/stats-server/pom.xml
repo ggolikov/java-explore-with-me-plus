@@ -12,6 +12,7 @@
     </parent>
 
     <artifactId>stats-server</artifactId>
+         <packaging>jar</packaging>
 
     <dependencies>
         <dependency>
