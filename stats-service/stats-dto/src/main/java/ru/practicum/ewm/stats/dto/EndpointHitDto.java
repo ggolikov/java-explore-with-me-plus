@@ -16,6 +16,8 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Builder
 public class EndpointHitDto {
+    private Long id;
+
     @NotBlank
     private String app;
 
