@@ -24,7 +24,7 @@ public class StatsServiceImpl implements StatsService {
     }
 
     @Override
-    public List<ViewStatsDto> getStats(LocalDateTime start, LocalDateTime end, List<String> uris, boolean unique) {
+    public List<ViewStatsDto> getStats(LocalDateTime start, LocalDateTime end, List<String> uris, Boolean unique) {
         List<String> filterUris = (uris == null || uris.isEmpty()) ? null : uris;
         if (unique) {
             return hitRepository.findStatsUnique(start, end, filterUris);
