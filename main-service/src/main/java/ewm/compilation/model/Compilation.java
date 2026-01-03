@@ -15,7 +15,8 @@ import java.util.Set;
         name = "compilations",
         uniqueConstraints = @UniqueConstraint(name = "uq_compilation_title", columnNames = "title")
 )
-@Getter @Setter
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public class Compilation {

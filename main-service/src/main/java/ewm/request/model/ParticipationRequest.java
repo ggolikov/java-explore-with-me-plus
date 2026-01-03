@@ -18,7 +18,8 @@ import java.time.LocalDateTime;
                 columnNames = {"requester_id", "event_id"}
         )
 )
-@Getter @Setter
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public class ParticipationRequest {
