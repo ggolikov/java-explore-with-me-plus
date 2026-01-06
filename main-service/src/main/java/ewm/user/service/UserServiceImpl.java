@@ -26,7 +26,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public List<UserDto> getUsers(UserParam param ) {
+    public List<UserDto> getUsers(UserParam param) {
         List<Long> ids = param.getIds();
         int from = param.getFrom();
         int size = param.getSize();
