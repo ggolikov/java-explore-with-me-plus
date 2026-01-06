@@ -2,6 +2,7 @@ package ewm.user.service;
 
 import ewm.user.dto.NewUserRequest;
 import ewm.user.dto.UserDto;
+import ewm.user.dto.UserParam;
 import ewm.user.mapper.UserMapper;
 import ewm.user.model.User;
 import ewm.user.repository.UserRepository;
@@ -25,7 +26,11 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public List<UserDto> getUsers(List<Long> ids, int from, int size) {
+    public List<UserDto> getUsers(UserParam param ) {
+        List<Long> ids = param.getIds();
+        int from = param.getFrom();
+        int size = param.getSize();
+
         PageRequest page = PageRequest.of(from / size, size);
 
         List<User> users = (ids == null || ids.isEmpty())

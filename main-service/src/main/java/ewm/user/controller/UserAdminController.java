@@ -2,6 +2,7 @@ package ewm.user.controller;
 
 import ewm.user.dto.NewUserRequest;
 import ewm.user.dto.UserDto;
+import ewm.user.dto.UserParam;
 import ewm.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -28,7 +29,8 @@ public class UserAdminController {
             @RequestParam(defaultValue = "0") int from,
             @RequestParam(defaultValue = "10") int size
     ) {
-        return userService.getUsers(ids, from, size);
+        UserParam param = new UserParam(ids, from, size);
+        return userService.getUsers(param);
     }
 
     @DeleteMapping("/{userId}")
