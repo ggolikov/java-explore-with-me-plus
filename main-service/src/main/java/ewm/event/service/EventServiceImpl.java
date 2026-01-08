@@ -1,0 +1,93 @@
+package ewm.event.service;
+
+import ewm.common.exception.BadRequestException;
+import ewm.common.exception.NotFoundException;
+import ewm.event.dto.EventFullDto;
+import ewm.event.dto.EventShortDto;
+import ewm.event.dto.NewEventDto;
+import ewm.event.dto.UpdateEventUserRequest;
+import ewm.event.mapper.EventMapper;
+import ewm.event.model.Event;
+import ewm.event.model.EventState;
+import ewm.event.repository.EventRepository;
+import ewm.user.model.User;
+import ewm.user.repository.UserRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+
+import java.time.LocalDateTime;
+import java.util.List;
+
+@Service
+@RequiredArgsConstructor
+public class EventServiceImpl implements EventService {
+    private final UserRepository userRepository;
+    private final EventRepository eventRepository;
+
+    @Override
+    public EventFullDto create(Long userId, NewEventDto eventDto) {
+        isEventTimeValid(eventDto.getEventDate());
+        User user = userRepository.findById(userId)
+                // FIXME ApiError
+                .orElseThrow(() -> new NotFoundException("User not found"));
+
+        // TODO Category
+        Event event = EventMapper.mapToEvent(user, eventDto, null);
+        event.setCreatedOn(LocalDateTime.now());
+        event.setState(EventState.PENDING);
+        event = eventRepository.save(event);
+        return EventMapper.mapToEventFullDto(event);
+    }
+
+    @Override
+    public EventFullDto get(Long userId, Long eventId) {
+        Event event = eventRepository.findById(eventId)
+                // FIXME ApiError
+                .orElseThrow(() -> new NotFoundException("Event not found"));
+        if (!event.getInitiator().getId().equals(userId)) {
+            // FIXME ApiError
+            throw new BadRequestException("User is not the initiator");
+        }
+        return EventMapper.mapToEventFullDto(event);
+    }
+
+    @Override
+    public List<EventShortDto> getEvents(Long userId, int from, int size) {
+        userRepository.findById(userId)
+                // FIXME ApiError
+                .orElseThrow(() -> new NotFoundException("User not found"));
+        Pageable page = PageRequest.of(from / size, size);
+        return eventRepository.findByInitiatorId(userId, page)
+                .stream()
+                .map(EventMapper::mapToEventShortDto)
+                .toList();
+    }
+
+    @Override
+    public EventFullDto update(Long userId, Long eventId, UpdateEventUserRequest updateEventUserRequest) {
+        Event currentEvent = eventRepository.findById(eventId)
+                // FIXME ApiError
+                .orElseThrow(() -> new NotFoundException("Event not found"));
+        if (currentEvent.getState().equals(EventState.PUBLISHED)) {
+            // FIXME ApiError
+            throw new BadRequestException("Event is already published");
+        }
+        if (!currentEvent.getInitiator().getId().equals(userId)) {
+            // FIXME ApiError
+            throw new BadRequestException("User not allowed to update event");
+        }
+        Event updatedEvent = EventMapper.updateEvent(currentEvent, updateEventUserRequest);
+        isEventTimeValid(updatedEvent.getEventDate());
+        updatedEvent = eventRepository.save(updatedEvent);
+        return EventMapper.mapToEventFullDto(updatedEvent);
+    }
+
+    private void isEventTimeValid(LocalDateTime eventTime) {
+        if (eventTime.isBefore(LocalDateTime.now().plusHours(2))) {
+            // FIXME ApiError
+            throw new BadRequestException("Invalid event time");
+        }
+    }
+}

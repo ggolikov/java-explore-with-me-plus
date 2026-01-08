@@ -4,11 +4,10 @@ import ewm.category.model.Category;
 import ewm.common.model.Location;
 import ewm.user.model.User;
 import jakarta.persistence.*;
-
-import lombok.Getter;
-import lombok.Setter;
-import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.time.LocalDateTime;
 
@@ -78,10 +77,4 @@ public class Event {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
     private EventState state;
-
-    @PrePersist
-    void onCreate() {
-        createdOn = LocalDateTime.now();
-        state = EventState.PENDING;
-    }
 }

@@ -1,7 +1,9 @@
 package ewm.event.dto;
 
-import ewm.common.dto.Location;
+import ewm.common.dto.LocationDto;
 import lombok.Data;
+
+import java.time.LocalDateTime;
 
 @Data
 public class UpdateEventUserRequest {
@@ -9,10 +11,50 @@ public class UpdateEventUserRequest {
     private String annotation;
     private String description;
     private Long category;
-    private String eventDate;
-    private Location location;
+    private LocalDateTime eventDate;
+    private LocationDto location;
     private Boolean paid;
     private Integer participantLimit;
     private Boolean requestModeration;
     private String stateAction; // SEND_TO_REVIEW | CANCEL_REVIEW
+
+    public boolean hasTitle() {
+        return !(title == null || title.isBlank());
+    }
+
+    public boolean hasAnnotation() {
+        return !(annotation == null || annotation.isBlank());
+    }
+
+    public boolean hasDescription() {
+        return !(description == null || description.isBlank());
+    }
+
+    public boolean hasCategory() {
+        return category != null;
+    }
+
+    public boolean hasEventDate() {
+        return eventDate != null;
+    }
+
+    public boolean hasLocation() {
+        return location != null;
+    }
+
+    public boolean hasPaid() {
+        return paid != null;
+    }
+
+    public boolean hasParticipantLimit() {
+        return participantLimit != null;
+    }
+
+    public boolean hasRequestModeration() {
+        return requestModeration != null;
+    }
+
+    public boolean hasStateAction() {
+        return stateAction != null;
+    }
 }
