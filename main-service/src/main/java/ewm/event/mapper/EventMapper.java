@@ -8,6 +8,8 @@ import ewm.event.dto.EventShortDto;
 import ewm.event.dto.NewEventDto;
 import ewm.event.dto.UpdateEventUserRequest;
 import ewm.event.model.Event;
+import ewm.event.model.EventState;
+import ewm.event.model.EventStateAction;
 import ewm.user.mapper.UserMapper;
 import ewm.user.model.User;
 
@@ -120,7 +122,11 @@ public class EventMapper {
         if (updateEventUserRequest.hasRequestModeration()) {
             event.setRequestModeration(updateEventUserRequest.getRequestModeration());
         }
-        // TODO hasStateAction in service
+        if (updateEventUserRequest.hasStateAction()) {
+            EventState eventState = updateEventUserRequest.getStateAction() == EventStateAction.SEND_TO_REVIEW
+                    ? EventState.PENDING : EventState.CANCELED;
+            event.setState(eventState);
+        }
         return event;
     }
 }

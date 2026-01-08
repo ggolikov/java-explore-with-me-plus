@@ -30,7 +30,6 @@ public class EventServiceImpl implements EventService {
     public EventFullDto create(Long userId, NewEventDto eventDto) {
         isEventTimeValid(eventDto.getEventDate());
         User user = userRepository.findById(userId)
-                // FIXME ApiError
                 .orElseThrow(() -> new NotFoundException("User not found"));
 
         // TODO Category
@@ -44,10 +43,8 @@ public class EventServiceImpl implements EventService {
     @Override
     public EventFullDto get(Long userId, Long eventId) {
         Event event = eventRepository.findById(eventId)
-                // FIXME ApiError
                 .orElseThrow(() -> new NotFoundException("Event not found"));
         if (!event.getInitiator().getId().equals(userId)) {
-            // FIXME ApiError
             throw new BadRequestException("User is not the initiator");
         }
         return EventMapper.mapToEventFullDto(event);
@@ -56,7 +53,6 @@ public class EventServiceImpl implements EventService {
     @Override
     public List<EventShortDto> getEvents(Long userId, int from, int size) {
         userRepository.findById(userId)
-                // FIXME ApiError
                 .orElseThrow(() -> new NotFoundException("User not found"));
         Pageable page = PageRequest.of(from / size, size);
         return eventRepository.findByInitiatorId(userId, page)
@@ -68,14 +64,11 @@ public class EventServiceImpl implements EventService {
     @Override
     public EventFullDto update(Long userId, Long eventId, UpdateEventUserRequest updateEventUserRequest) {
         Event currentEvent = eventRepository.findById(eventId)
-                // FIXME ApiError
                 .orElseThrow(() -> new NotFoundException("Event not found"));
         if (currentEvent.getState().equals(EventState.PUBLISHED)) {
-            // FIXME ApiError
             throw new BadRequestException("Event is already published");
         }
         if (!currentEvent.getInitiator().getId().equals(userId)) {
-            // FIXME ApiError
             throw new BadRequestException("User not allowed to update event");
         }
         Event updatedEvent = EventMapper.updateEvent(currentEvent, updateEventUserRequest);
@@ -86,7 +79,6 @@ public class EventServiceImpl implements EventService {
 
     private void isEventTimeValid(LocalDateTime eventTime) {
         if (eventTime.isBefore(LocalDateTime.now().plusHours(2))) {
-            // FIXME ApiError
             throw new BadRequestException("Invalid event time");
         }
     }

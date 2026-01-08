@@ -1,6 +1,7 @@
 package ewm.event.dto;
 
 import ewm.common.dto.LocationDto;
+import ewm.event.model.EventStateAction;
 import lombok.Data;
 
 import java.time.LocalDateTime;
@@ -16,7 +17,7 @@ public class UpdateEventUserRequest {
     private Boolean paid;
     private Integer participantLimit;
     private Boolean requestModeration;
-    private String stateAction; // SEND_TO_REVIEW | CANCEL_REVIEW
+    private EventStateAction stateAction; // SEND_TO_REVIEW | CANCEL_REVIEW
 
     public boolean hasTitle() {
         return !(title == null || title.isBlank());
