@@ -3,10 +3,7 @@ package ewm.event.mapper;
 import ewm.category.model.Category;
 import ewm.common.dto.LocationDto;
 import ewm.common.model.Location;
-import ewm.event.dto.EventFullDto;
-import ewm.event.dto.EventShortDto;
-import ewm.event.dto.NewEventDto;
-import ewm.event.dto.UpdateEventUserRequest;
+import ewm.event.dto.*;
 import ewm.event.model.Event;
 import ewm.event.model.EventState;
 import ewm.event.model.EventStateAction;
@@ -126,6 +123,42 @@ public class EventMapper {
             EventState eventState = updateEventUserRequest.getStateAction() == EventStateAction.SEND_TO_REVIEW
                     ? EventState.PENDING : EventState.CANCELED;
             event.setState(eventState);
+        }
+        return event;
+    }
+
+    public static Event updateEvent(Event event, UpdateEventAdminRequest updateEventAdminRequest) {
+        if (updateEventAdminRequest.hasTitle()) {
+            event.setTitle(updateEventAdminRequest.getTitle());
+        }
+        if (updateEventAdminRequest.hasAnnotation()) {
+            event.setAnnotation(updateEventAdminRequest.getAnnotation());
+        }
+        if (updateEventAdminRequest.hasDescription()) {
+            event.setDescription(updateEventAdminRequest.getDescription());
+        }
+
+        /* TODO Category
+        if (updateEventAdminRequest.hasCategory()) {} */
+
+        if (updateEventAdminRequest.hasEventDate()) {
+            event.setEventDate(updateEventAdminRequest.getEventDate());
+        }
+
+        if (updateEventAdminRequest.hasLocation()) {
+            Location location = new Location();
+            location.setLat(updateEventAdminRequest.getLocation().getLat());
+            location.setLon(updateEventAdminRequest.getLocation().getLon());
+            event.setLocation(location);
+        }
+        if (updateEventAdminRequest.hasPaid()) {
+            event.setPaid(updateEventAdminRequest.getPaid());
+        }
+        if (updateEventAdminRequest.hasParticipantLimit()) {
+            event.setParticipantLimit(updateEventAdminRequest.getParticipantLimit());
+        }
+        if (updateEventAdminRequest.hasRequestModeration()) {
+            event.setRequestModeration(updateEventAdminRequest.getRequestModeration());
         }
         return event;
     }

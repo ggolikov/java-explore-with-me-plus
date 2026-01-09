@@ -1,5 +1,6 @@
 package ewm.event.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import ewm.common.dto.LocationDto;
 import ewm.event.model.EventStateAction;
 import lombok.Data;
@@ -12,7 +13,10 @@ public class UpdateEventUserRequest {
     private String annotation;
     private String description;
     private Long category;
+
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime eventDate;
+
     private LocationDto location;
     private Boolean paid;
     private Integer participantLimit;

@@ -1,14 +1,13 @@
 package ewm.event.service;
 
 import ewm.common.exception.BadRequestException;
+import ewm.common.exception.ConflictException;
 import ewm.common.exception.NotFoundException;
-import ewm.event.dto.EventFullDto;
-import ewm.event.dto.EventShortDto;
-import ewm.event.dto.NewEventDto;
-import ewm.event.dto.UpdateEventUserRequest;
+import ewm.event.dto.*;
 import ewm.event.mapper.EventMapper;
 import ewm.event.model.Event;
 import ewm.event.model.EventState;
+import ewm.event.model.EventStateActionAdmin;
 import ewm.event.repository.EventRepository;
 import ewm.user.model.User;
 import ewm.user.repository.UserRepository;
@@ -51,6 +50,21 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
+    public List<EventFullDto> get(List<Long> users,
+                                  List<EventState> states,
+                                  List<Integer> categories,
+                                  LocalDateTime rangeStart,
+                                  LocalDateTime rangeEnd,
+                                  int from,
+                                  int size) {
+        Pageable page = PageRequest.of(from / size, size);
+        return eventRepository.findForAdmin(users, states, categories, rangeStart, rangeEnd, page)
+                .stream()
+                .map(EventMapper::mapToEventFullDto)
+                .toList();
+    }
+
+    @Override
     public List<EventShortDto> getEvents(Long userId, int from, int size) {
         userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("User not found"));
@@ -66,13 +80,39 @@ public class EventServiceImpl implements EventService {
         Event currentEvent = eventRepository.findById(eventId)
                 .orElseThrow(() -> new NotFoundException("Event not found"));
         if (currentEvent.getState().equals(EventState.PUBLISHED)) {
-            throw new BadRequestException("Event is already published");
+            throw new ConflictException("Event is already published");
         }
         if (!currentEvent.getInitiator().getId().equals(userId)) {
             throw new BadRequestException("User not allowed to update event");
         }
         Event updatedEvent = EventMapper.updateEvent(currentEvent, updateEventUserRequest);
         isEventTimeValid(updatedEvent.getEventDate());
+        updatedEvent = eventRepository.save(updatedEvent);
+        return EventMapper.mapToEventFullDto(updatedEvent);
+    }
+
+    @Override
+    public EventFullDto update(Long eventId, UpdateEventAdminRequest updateEventAdminRequest) {
+        Event currentEvent = eventRepository.findById(eventId)
+                .orElseThrow(() -> new NotFoundException("Event not found"));
+        if (currentEvent.getState().equals(EventState.PUBLISHED) &&
+                updateEventAdminRequest.getEventDate() != null &&
+                updateEventAdminRequest.getEventDate().isAfter(currentEvent.getPublishedOn().minusHours(1))) {
+            throw new ConflictException("Invalid event time");
+        }
+        if (updateEventAdminRequest.getStateAction() != null) {
+            if (currentEvent.getState().equals(EventState.PENDING)) {
+                if (updateEventAdminRequest.getStateAction().equals(EventStateActionAdmin.PUBLISH_EVENT)) {
+                    currentEvent.setState(EventState.PUBLISHED);
+                    currentEvent.setPublishedOn(LocalDateTime.now());
+                } else {
+                    currentEvent.setState(EventState.CANCELED);
+                }
+            } else {
+                throw new ConflictException("Invalid event state");
+            }
+        }
+        Event updatedEvent = EventMapper.updateEvent(currentEvent, updateEventAdminRequest);
         updatedEvent = eventRepository.save(updatedEvent);
         return EventMapper.mapToEventFullDto(updatedEvent);
     }
