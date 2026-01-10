@@ -1,6 +1,7 @@
 package ewm.event.repository;
 
 import ewm.event.model.Event;
+import ewm.event.model.EventSort;
 import ewm.event.model.EventState;
 import org.springframework.data.domain.Pageable;
 
@@ -20,5 +21,15 @@ public interface EventRepository {
                              LocalDateTime rangeEnd,
                              Pageable page);
 
+    List<Event> findPublicEvents(String text,
+                                 List<Integer> categories,
+                                 Boolean paid,
+                                 LocalDateTime rangeStart,
+                                 LocalDateTime rangeEnd,
+                                 Boolean onlyAvailable,
+                                 Pageable page);
+
     Optional<Event> findById(Long eventId);
+
+    Optional<Event> findByIdAndState(Long eventId, EventState eventState);
 }

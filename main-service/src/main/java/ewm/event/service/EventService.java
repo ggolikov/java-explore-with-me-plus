@@ -1,6 +1,7 @@
 package ewm.event.service;
 
 import ewm.event.dto.*;
+import ewm.event.model.EventSort;
 import ewm.event.model.EventState;
 
 import java.time.LocalDateTime;
@@ -19,7 +20,19 @@ public interface EventService {
                            int from,
                            int size);
 
+    EventFullDto getPublicEvent(Long eventId);
+
     List<EventShortDto> getEvents(Long userId, int from, int size);
+
+    List<EventShortDto> getPublicEvents(String text,
+                                        List<Integer> categories,
+                                        Boolean paid,
+                                        LocalDateTime rangeStart,
+                                        LocalDateTime rangeEnd,
+                                        Boolean onlyAvailable,
+                                        EventSort sort,
+                                        int from,
+                                        int size);
 
     EventFullDto update(Long userId, Long eventId, UpdateEventUserRequest updateEventUserRequest);
 

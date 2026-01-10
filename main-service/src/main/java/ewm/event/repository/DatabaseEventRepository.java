@@ -1,6 +1,7 @@
 package ewm.event.repository;
 
 import ewm.event.model.Event;
+import ewm.event.model.EventSort;
 import ewm.event.model.EventState;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -13,7 +14,7 @@ public interface DatabaseEventRepository extends EventRepository, JpaRepository<
     @Override
     @Query("""
             SELECT e
-            FROM EVENT e
+            FROM Event e
             WHERE e.initiator.id IN :users
             AND e.state IN :states
             AND e.category.id IN :categories
@@ -26,4 +27,24 @@ public interface DatabaseEventRepository extends EventRepository, JpaRepository<
                              LocalDateTime rangeStart,
                              LocalDateTime rangeEnd,
                              Pageable page);
+
+    @Override
+    @Query("""
+            SELECT e
+            FROM Event e
+            WHERE e.state = 'PUBLISHED'
+            AND (:text IS NULL OR LOWER(e.annotation) LIKE LOWER(CONCAT('%', :text, '%'))
+                        OR LOWER(e.description) LIKE LOWER(CONCAT('%', :text, '%')))
+            AND :categories IS NULL OR e.category.id IN :categories
+            AND :paid IS NULL OR e.paid = :paid
+            AND e.eventDate >= :rangeStart
+            AND :rangeEnd IS NULL OR e.eventDate <= :rangeEnd
+            """)
+    List<Event> findPublicEvents(String text,
+                                 List<Integer> categories,
+                                 Boolean paid,
+                                 LocalDateTime rangeStart,
+                                 LocalDateTime rangeEnd,
+                                 Boolean onlyAvailable,
+                                 Pageable page);
 }

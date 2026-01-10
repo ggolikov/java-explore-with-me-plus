@@ -6,6 +6,7 @@ import ewm.common.exception.NotFoundException;
 import ewm.event.dto.*;
 import ewm.event.mapper.EventMapper;
 import ewm.event.model.Event;
+import ewm.event.model.EventSort;
 import ewm.event.model.EventState;
 import ewm.event.model.EventStateActionAdmin;
 import ewm.event.repository.EventRepository;
@@ -14,6 +15,7 @@ import ewm.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -65,11 +67,47 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
+    public EventFullDto getPublicEvent(Long eventId) {
+        Event event = eventRepository.findById(eventId)
+                .orElseThrow(() -> new NotFoundException("Event not found"));
+        if (event.getState() != EventState.PUBLISHED) {
+            throw new ConflictException("Event is not published");
+        }
+        return EventMapper.mapToEventFullDto(event);
+    }
+
+    @Override
     public List<EventShortDto> getEvents(Long userId, int from, int size) {
         userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("User not found"));
         Pageable page = PageRequest.of(from / size, size);
         return eventRepository.findByInitiatorId(userId, page)
+                .stream()
+                .map(EventMapper::mapToEventShortDto)
+                .toList();
+    }
+
+    @Override
+    public List<EventShortDto> getPublicEvents(String text,
+                                               List<Integer> categories,
+                                               Boolean paid,
+                                               LocalDateTime rangeStart,
+                                               LocalDateTime rangeEnd,
+                                               Boolean onlyAvailable,
+                                               EventSort sort,
+                                               int from,
+                                               int size) {
+        Sort sortBy = null;
+        if (sort.equals(EventSort.EVENT_DATE)) {
+            sortBy = Sort.by(Sort.Direction.DESC, "event_date");
+        } else if (sort.equals(EventSort.VIEWS)) {
+            sortBy = Sort.by(Sort.Direction.DESC, "views");
+        }
+        Pageable page = PageRequest.of(from / size, size, sortBy);
+        if (rangeStart == null) {
+            rangeStart = LocalDateTime.now();
+        }
+        return eventRepository.findPublicEvents(text, categories, paid, rangeStart, rangeEnd, onlyAvailable, page)
                 .stream()
                 .map(EventMapper::mapToEventShortDto)
                 .toList();
