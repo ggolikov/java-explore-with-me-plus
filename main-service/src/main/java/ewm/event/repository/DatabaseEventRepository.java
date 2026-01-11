@@ -17,8 +17,8 @@ public interface DatabaseEventRepository extends EventRepository, JpaRepository<
             WHERE e.initiator.id IN :users
             AND e.state IN :states
             AND e.category.id IN :categories
-            AND e.eventDate >= e.rangeStart
-            AND e.eventDate <= e.rangeEnd
+            AND e.eventDate >= :rangeStart
+            AND e.eventDate <= :rangeEnd
             """)
     List<Event> findForAdmin(List<Long> users,
                              List<EventState> states,
@@ -33,11 +33,15 @@ public interface DatabaseEventRepository extends EventRepository, JpaRepository<
             FROM Event e
             WHERE e.state = 'PUBLISHED'
             AND (:text IS NULL OR LOWER(e.annotation) LIKE LOWER(CONCAT('%', :text, '%'))
-                        OR LOWER(e.description) LIKE LOWER(CONCAT('%', :text, '%')))
-            AND :categories IS NULL OR e.category.id IN :categories
-            AND :paid IS NULL OR e.paid = :paid
-            AND e.eventDate >= :rangeStart
-            AND :rangeEnd IS NULL OR e.eventDate <= :rangeEnd
+                     OR LOWER(e.description) LIKE LOWER(CONCAT('%', :text, '%')))
+            AND (:categories IS NULL OR e.category.id IN :categories)
+            AND (:paid IS NULL OR e.paid = :paid)
+            AND (e.eventDate >= :rangeStart)
+            AND (:rangeEnd IS NULL OR e.eventDate <= :rangeEnd)
+            AND (:onlyAvailable IS NULL
+                OR :onlyAvailable = FALSE
+                OR e.participantLimit = 0
+                OR e.confirmedRequests < e.participantLimit)
             """)
     List<Event> findPublicEvents(String text,
                                  List<Integer> categories,
