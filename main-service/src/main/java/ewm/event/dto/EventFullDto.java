@@ -1,7 +1,7 @@
 package ewm.event.dto;
 
 import ewm.category.dto.CategoryDto;
-import ewm.common.dto.Location;
+import ewm.common.dto.LocationDto;
 import ewm.user.dto.UserShortDto;
 import lombok.Data;
 
@@ -16,7 +16,7 @@ public class EventFullDto {
     private String eventDate;
     private String publishedOn;
     private UserShortDto initiator;
-    private Location location;
+    private LocationDto location;
     private Boolean paid;
     private Integer participantLimit;
     private Boolean requestModeration;

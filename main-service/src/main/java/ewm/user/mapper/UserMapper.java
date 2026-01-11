@@ -2,6 +2,7 @@ package ewm.user.mapper;
 
 import ewm.user.dto.NewUserRequest;
 import ewm.user.dto.UserDto;
+import ewm.user.dto.UserShortDto;
 import ewm.user.model.User;
 
 public class UserMapper {
@@ -20,6 +21,13 @@ public class UserMapper {
         dto.setName(user.getName());
         dto.setEmail(user.getEmail());
 
+        return dto;
+    }
+
+    public static UserShortDto toShortDto(User user) {
+        UserShortDto dto = new UserShortDto();
+        dto.setId(user.getId());
+        dto.setName(user.getName());
         return dto;
     }
 }
