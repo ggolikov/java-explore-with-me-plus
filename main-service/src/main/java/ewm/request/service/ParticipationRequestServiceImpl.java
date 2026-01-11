@@ -3,7 +3,7 @@ package ewm.request.service;
 import ewm.common.exception.ConflictException;
 import ewm.common.exception.NotFoundException;
 import ewm.event.model.Event;
-import ewm.event.model.EventState; // ожидается enum с PUBLISHED
+import ewm.event.model.EventState;
 import ewm.event.repository.EventRepository;
 import ewm.request.dto.EventRequestStatusUpdateRequest;
 import ewm.request.dto.EventRequestStatusUpdateResult;
@@ -18,7 +18,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service

@@ -5,7 +5,8 @@ import ewm.request.model.ParticipationRequest;
 
 public final class ParticipationRequestMapper {
 
-    private ParticipationRequestMapper() {}
+    private ParticipationRequestMapper() {
+    }
 
     public static ParticipationRequestDto toDto(ParticipationRequest r) {
         return ParticipationRequestDto.builder()
