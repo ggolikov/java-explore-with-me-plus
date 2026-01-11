@@ -1,8 +1,14 @@
 package ewm.request.dto;
 
-import lombok.Data;
+import lombok.*;
+
 import java.util.List;
 
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 @Data
 public class EventRequestStatusUpdateResult {
     private List<ParticipationRequestDto> confirmedRequests;

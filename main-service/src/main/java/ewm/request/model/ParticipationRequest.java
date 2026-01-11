@@ -3,10 +3,10 @@ package ewm.request.model;
 import ewm.event.model.Event;
 import ewm.user.model.User;
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.time.LocalDateTime;
 
@@ -28,11 +28,11 @@ public class ParticipationRequest {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(optional = false)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "requester_id")
     private User requester;
 
-    @ManyToOne(optional = false)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "event_id")
     private Event event;
 
@@ -45,7 +45,11 @@ public class ParticipationRequest {
 
     @PrePersist
     void onCreate() {
-        created = LocalDateTime.now();
-        status = RequestStatus.PENDING;
+        if (created == null) {
+            created = LocalDateTime.now();
+        }
+        if (status == null) {
+            status = RequestStatus.PENDING;
+        }
     }
 }

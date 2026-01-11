@@ -25,13 +25,26 @@ CREATE TABLE events (
     views INT DEFAULT 0
 );
 
-CREATE TABLE event_requests (
-    request_id BIGSERIAL PRIMARY KEY,
-    event_id BIGINT NOT NULL REFERENCES events(event_id),
-    requester_id BIGINT NOT NULL REFERENCES users(user_id),
-    status VARCHAR(50) DEFAULT 'PENDING',
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+-- CREATE TABLE event_requests (
+--     request_id BIGSERIAL PRIMARY KEY,
+--     event_id BIGINT NOT NULL REFERENCES events(event_id),
+--     requester_id BIGINT NOT NULL REFERENCES users(user_id),
+--     status VARCHAR(50) DEFAULT 'PENDING',
+--     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+-- );
+
+CREATE TABLE participation_requests (
+                                        id BIGSERIAL PRIMARY KEY,
+                                        event_id BIGINT NOT NULL REFERENCES events(event_id),
+                                        requester_id BIGINT NOT NULL REFERENCES users(user_id),
+                                        status VARCHAR(20) NOT NULL DEFAULT 'PENDING',
+                                        created TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                                        CONSTRAINT uq_event_requester UNIQUE (event_id, requester_id)
 );
+
+CREATE INDEX idx_pr_event ON participation_requests (event_id);
+CREATE INDEX idx_pr_requester ON participation_requests (requester_id);
+
 
 CREATE TABLE compilations (
     compilation_id BIGSERIAL PRIMARY KEY,
