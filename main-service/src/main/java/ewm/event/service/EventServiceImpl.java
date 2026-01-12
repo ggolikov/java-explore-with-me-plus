@@ -1,5 +1,7 @@
 package ewm.event.service;
 
+import ewm.category.model.Category;
+import ewm.category.repository.CategoryRepository;
 import ewm.common.exception.BadRequestException;
 import ewm.common.exception.ConflictException;
 import ewm.common.exception.NotFoundException;
@@ -26,6 +28,7 @@ import java.util.List;
 public class EventServiceImpl implements EventService {
     private final UserRepository userRepository;
     private final EventRepository eventRepository;
+    private final CategoryRepository categoryRepository;
 
     @Override
     public EventFullDto create(Long userId, NewEventDto eventDto) {
@@ -34,7 +37,9 @@ public class EventServiceImpl implements EventService {
                 .orElseThrow(() -> new NotFoundException("User not found"));
 
         // TODO Category
-        Event event = EventMapper.mapToEvent(user, eventDto, null);
+        Category category = categoryRepository.findById(eventDto.getCategory())
+                .orElseThrow(() -> new NotFoundException("Category not found"));
+        Event event = EventMapper.mapToEvent(user, eventDto, category);
         event.setCreatedOn(LocalDateTime.now());
         event.setState(EventState.PENDING);
         event = eventRepository.save(event);
@@ -99,7 +104,7 @@ public class EventServiceImpl implements EventService {
                                                int size) {
         Sort sortBy = null;
         if (sort.equals(EventSort.EVENT_DATE)) {
-            sortBy = Sort.by(Sort.Direction.DESC, "event_date");
+            sortBy = Sort.by(Sort.Direction.DESC, "eventDate");
         } else if (sort.equals(EventSort.VIEWS)) {
             sortBy = Sort.by(Sort.Direction.DESC, "views");
         }

@@ -20,7 +20,7 @@ public class EventPublicController {
 
     @GetMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
-    public EventFullDto getPublicEvent(@RequestParam Long eventId) {
+    public EventFullDto getPublicEvent(@PathVariable("id") Long eventId) {
         return eventService.getPublicEvent(eventId);
     }
 

@@ -1,5 +1,6 @@
 package ewm.event.mapper;
 
+import ewm.category.mapper.CategoryMapper;
 import ewm.category.model.Category;
 import ewm.common.dto.LocationDto;
 import ewm.common.model.Location;
@@ -16,6 +17,7 @@ public class EventMapper {
                                    NewEventDto eventDto,
                                    Category category) {
         Event event = new Event();
+        event.setInitiator(initiator);
         event.setTitle(eventDto.getTitle());
         event.setAnnotation(eventDto.getAnnotation());
         event.setDescription(eventDto.getDescription());
@@ -41,12 +43,12 @@ public class EventMapper {
         eventFullDto.setAnnotation(event.getAnnotation());
         eventFullDto.setDescription(event.getDescription());
 
-        /* TODO Category
-        eventFullDto.setCategory(null); */
+        // TODO Category
+        eventFullDto.setCategory(CategoryMapper.toDto(event.getCategory()));
 
-        eventFullDto.setCreatedOn(String.valueOf(event.getCreatedOn()));
-        eventFullDto.setEventDate(String.valueOf(event.getEventDate()));
-        eventFullDto.setPublishedOn(String.valueOf(event.getPublishedOn()));
+        eventFullDto.setCreatedOn(event.getCreatedOn());
+        eventFullDto.setEventDate(event.getEventDate());
+        eventFullDto.setPublishedOn(event.getPublishedOn());
         eventFullDto.setInitiator(UserMapper.toShortDto(event.getInitiator()));
         LocationDto locationDto = new LocationDto();
         locationDto.setLat(event.getLocation().getLat());
@@ -57,8 +59,8 @@ public class EventMapper {
         eventFullDto.setRequestModeration(event.getRequestModeration());
         eventFullDto.setState(String.valueOf(event.getState()));
 
-        /* TODO Request
-        eventFullDto.setConfirmedRequests(null); */
+        // TODO Request
+        eventFullDto.setConfirmedRequests(event.getConfirmedRequests());
 
         // FIXME use stat-svc
         event.setViews(0L);
@@ -71,13 +73,13 @@ public class EventMapper {
         eventShortDto.setTitle(event.getTitle());
         eventShortDto.setAnnotation(event.getAnnotation());
 
-        /* TODO Category
-        eventShortDto.setCategory(null); */
+        // TODO Category
+        eventShortDto.setCategory(CategoryMapper.toDto(event.getCategory()));
 
-        /* TODO Request
-        eventShortDto.setConfirmedRequests(null); */
+        // TODO Request
+        eventShortDto.setConfirmedRequests(event.getConfirmedRequests());
 
-        eventShortDto.setEventDate(String.valueOf(event.getEventDate()));
+        eventShortDto.setEventDate(event.getEventDate());
         eventShortDto.setInitiator(UserMapper.toShortDto(event.getInitiator()));
         eventShortDto.setPaid(event.getPaid());
 
