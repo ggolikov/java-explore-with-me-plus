@@ -11,6 +11,7 @@ import ewm.user.mapper.UserMapper;
 import ewm.user.model.User;
 
 public class EventMapper {
+
     public static Event mapToEvent(User initiator,
                                    NewEventDto eventDto,
                                    Category category) {

@@ -11,10 +11,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 @Entity
-@Table(
-        name = "compilations",
-        uniqueConstraints = @UniqueConstraint(name = "uq_compilation_title", columnNames = "title")
-)
+@Table(name = "compilations")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -31,7 +28,7 @@ public class Compilation {
     @Column(nullable = false)
     private Boolean pinned = false;
 
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
             name = "compilation_events",
             joinColumns = @JoinColumn(name = "compilation_id"),

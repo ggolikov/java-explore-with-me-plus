@@ -1,11 +1,17 @@
 package ewm.compilation.dto;
 
-import lombok.Data;
-import java.util.List;
+import lombok.*;
+
+import java.util.Set;
 
 @Data
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class UpdateCompilationRequest {
     private String title;
     private Boolean pinned;
-    private List<Long> events;
+    private Set<Long> events;
 }
