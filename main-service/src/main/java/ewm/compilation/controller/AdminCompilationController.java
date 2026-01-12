@@ -5,8 +5,6 @@ import ewm.compilation.dto.NewCompilationDto;
 import ewm.compilation.dto.UpdateCompilationRequest;
 import ewm.compilation.service.CompilationService;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.Positive;
-import jakarta.validation.constraints.PositiveOrZero;
 import lombok.RequiredArgsConstructor;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;

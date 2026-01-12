@@ -23,7 +23,7 @@ import java.util.Set;
 @Service
 @RequiredArgsConstructor
 @Transactional
-public class CompilationServiceImpl implements  CompilationService{
+public class CompilationServiceImpl implements CompilationService {
 
     private final CompilationRepository compilationRepository;
     private final DatabaseEventRepository eventRepository;
