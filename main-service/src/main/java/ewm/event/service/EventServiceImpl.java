@@ -76,7 +76,7 @@ public class EventServiceImpl implements EventService {
         Event event = eventRepository.findById(eventId)
                 .orElseThrow(() -> new NotFoundException("Event not found"));
         if (event.getState() != EventState.PUBLISHED) {
-            throw new ConflictException("Event is not published");
+            throw new NotFoundException("Event is not published");
         }
         return EventMapper.mapToEventFullDto(event);
     }
@@ -102,15 +102,23 @@ public class EventServiceImpl implements EventService {
                                                EventSort sort,
                                                int from,
                                                int size) {
-        Sort sortBy = null;
-        if (sort.equals(EventSort.EVENT_DATE)) {
-            sortBy = Sort.by(Sort.Direction.DESC, "eventDate");
-        } else if (sort.equals(EventSort.VIEWS)) {
-            sortBy = Sort.by(Sort.Direction.DESC, "views");
+        Pageable page;
+        if (sort != null) {
+            Sort sortBy = null;
+            if (sort.equals(EventSort.EVENT_DATE)) {
+                sortBy = Sort.by(Sort.Direction.DESC, "eventDate");
+            } else if (sort.equals(EventSort.VIEWS)) {
+                sortBy = Sort.by(Sort.Direction.DESC, "views");
+            }
+            page = PageRequest.of(from / size, size, sortBy);
+        } else {
+            page = PageRequest.of(from / size, size);
         }
-        Pageable page = PageRequest.of(from / size, size, sortBy);
         if (rangeStart == null) {
             rangeStart = LocalDateTime.now();
+        }
+        if (rangeEnd != null && rangeEnd.isBefore(rangeStart)) {
+            throw new BadRequestException("Range start date is before end date");
         }
         return eventRepository.findPublicEvents(text, categories, paid, rangeStart, rangeEnd, onlyAvailable, page)
                 .stream()

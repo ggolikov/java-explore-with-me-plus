@@ -4,6 +4,7 @@ import ewm.event.dto.EventFullDto;
 import ewm.event.dto.EventShortDto;
 import ewm.event.model.EventSort;
 import ewm.event.service.EventService;
+import jakarta.validation.constraints.PositiveOrZero;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
@@ -35,8 +36,8 @@ public class EventPublicController {
                                                @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime rangeEnd,
                                                @RequestParam(defaultValue = "false") Boolean onlyAvailable,
                                                @RequestParam(required = false) EventSort sort,
-                                               @RequestParam(defaultValue = "0") int from,
-                                               @RequestParam(defaultValue = "10") int size) {
+                                               @RequestParam(defaultValue = "0") @PositiveOrZero int from,
+                                               @RequestParam(defaultValue = "10") @PositiveOrZero int size) {
         return eventService.getPublicEvents(text, categories, paid, rangeStart, rangeEnd, onlyAvailable, sort, from,
                 size);
     }

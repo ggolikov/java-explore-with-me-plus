@@ -2,20 +2,25 @@ package ewm.event.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import ewm.common.dto.LocationDto;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.*;
 import lombok.Data;
 
 import java.time.LocalDateTime;
 
 @Data
 public class NewEventDto {
+    @NotNull
+    @NotBlank
     @Size(min = 3, max = 120)
     private String title;
 
+    @NotNull
+    @NotBlank
     @Size(min = 20, max = 2000)
     private String annotation;
 
+    @NotNull
+    @NotBlank
     @Size(min = 20, max = 7000)
     private String description;
 
@@ -31,6 +36,7 @@ public class NewEventDto {
 
     private Boolean paid;
 
+    @Min(0)
     private Integer participantLimit;
 
     private Boolean requestModeration;
