@@ -14,11 +14,11 @@ public interface DatabaseEventRepository extends EventRepository, JpaRepository<
     @Query("""
             SELECT e
             FROM Event e
-            WHERE e.initiator.id IN :users
-            AND e.state IN :states
-            AND e.category.id IN :categories
-            AND e.eventDate >= :rangeStart
-            AND e.eventDate <= :rangeEnd
+            WHERE (:users IS NULL OR e.initiator.id IN :users)
+            AND (:states IS NULL OR e.state IN :states)
+            AND (:categories IS NULL OR e.category.id IN :categories)
+            AND (:rangeStart IS NULL OR e.eventDate >= :rangeStart)
+            AND (:rangeEnd IS NULL OR e.eventDate <= :rangeEnd)
             """)
     List<Event> findForAdmin(List<Long> users,
                              List<EventState> states,

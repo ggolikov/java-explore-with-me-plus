@@ -57,9 +57,6 @@ public class Event {
     private Boolean requestModeration = true;
 
     @Column(nullable = false)
-    private Long views = 0L;
-
-    @Column(nullable = false)
     private Long confirmedRequests = 0L;
 
     /* === Dates === */

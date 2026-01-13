@@ -4,6 +4,7 @@ import ewm.event.dto.EventFullDto;
 import ewm.event.dto.UpdateEventAdminRequest;
 import ewm.event.model.EventState;
 import ewm.event.service.EventService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
@@ -20,12 +21,12 @@ public class EventAdminController {
 
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
-    public List<EventFullDto> get(@RequestParam List<Long> users,
-                                  @RequestParam List<EventState> states,
-                                  @RequestParam List<Integer> categories,
-                                  @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    public List<EventFullDto> get(@RequestParam(required = false) List<Long> users,
+                                  @RequestParam(required = false) List<EventState> states,
+                                  @RequestParam(required = false) List<Long> categories,
+                                  @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
                                   LocalDateTime rangeStart,
-                                  @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+                                  @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
                                   LocalDateTime rangeEnd,
                                   @RequestParam(defaultValue = "0") int from,
                                   @RequestParam(defaultValue = "10") int size) {
@@ -34,8 +35,8 @@ public class EventAdminController {
 
     @PatchMapping("/{eventId}")
     @ResponseStatus(HttpStatus.OK)
-    public EventFullDto update(@RequestParam Long eventId,
-                               @RequestBody UpdateEventAdminRequest updateEventAdminRequest) {
+    public EventFullDto update(@PathVariable Long eventId,
+                               @RequestBody @Valid UpdateEventAdminRequest updateEventAdminRequest) {
         return eventService.update(eventId, updateEventAdminRequest);
     }
 }

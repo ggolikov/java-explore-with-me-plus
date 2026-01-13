@@ -1,5 +1,6 @@
 package ewm.event.mapper;
 
+import ewm.category.mapper.CategoryMapper;
 import ewm.category.model.Category;
 import ewm.common.dto.LocationDto;
 import ewm.common.model.Location;
@@ -16,13 +17,11 @@ public class EventMapper {
                                    NewEventDto eventDto,
                                    Category category) {
         Event event = new Event();
+        event.setInitiator(initiator);
         event.setTitle(eventDto.getTitle());
         event.setAnnotation(eventDto.getAnnotation());
         event.setDescription(eventDto.getDescription());
-
-        // TODO Category
         event.setCategory(category);
-
         event.setEventDate(eventDto.getEventDate());
         Location location = new Location();
         location.setLat(eventDto.getLocation().getLat());
@@ -40,13 +39,10 @@ public class EventMapper {
         eventFullDto.setTitle(event.getTitle());
         eventFullDto.setAnnotation(event.getAnnotation());
         eventFullDto.setDescription(event.getDescription());
-
-        /* TODO Category
-        eventFullDto.setCategory(null); */
-
-        eventFullDto.setCreatedOn(String.valueOf(event.getCreatedOn()));
-        eventFullDto.setEventDate(String.valueOf(event.getEventDate()));
-        eventFullDto.setPublishedOn(String.valueOf(event.getPublishedOn()));
+        eventFullDto.setCategory(CategoryMapper.toDto(event.getCategory()));
+        eventFullDto.setCreatedOn(event.getCreatedOn());
+        eventFullDto.setEventDate(event.getEventDate());
+        eventFullDto.setPublishedOn(event.getPublishedOn());
         eventFullDto.setInitiator(UserMapper.toShortDto(event.getInitiator()));
         LocationDto locationDto = new LocationDto();
         locationDto.setLat(event.getLocation().getLat());
@@ -57,11 +53,9 @@ public class EventMapper {
         eventFullDto.setRequestModeration(event.getRequestModeration());
         eventFullDto.setState(String.valueOf(event.getState()));
 
-        /* TODO Request
-        eventFullDto.setConfirmedRequests(null); */
+        // TODO Request
+        eventFullDto.setConfirmedRequests(event.getConfirmedRequests());
 
-        // FIXME use stat-svc
-        event.setViews(0L);
         return eventFullDto;
     }
 
@@ -70,20 +64,14 @@ public class EventMapper {
         eventShortDto.setId(event.getId());
         eventShortDto.setTitle(event.getTitle());
         eventShortDto.setAnnotation(event.getAnnotation());
+        eventShortDto.setCategory(CategoryMapper.toDto(event.getCategory()));
 
-        /* TODO Category
-        eventShortDto.setCategory(null); */
+        // TODO Request
+        eventShortDto.setConfirmedRequests(event.getConfirmedRequests());
 
-        /* TODO Request
-        eventShortDto.setConfirmedRequests(null); */
-
-        eventShortDto.setEventDate(String.valueOf(event.getEventDate()));
+        eventShortDto.setEventDate(event.getEventDate());
         eventShortDto.setInitiator(UserMapper.toShortDto(event.getInitiator()));
         eventShortDto.setPaid(event.getPaid());
-
-        // FIXME use stat-svc
-        eventShortDto.setViews(0L);
-
         return eventShortDto;
     }
 
@@ -97,14 +85,9 @@ public class EventMapper {
         if (updateEventUserRequest.hasDescription()) {
             event.setDescription(updateEventUserRequest.getDescription());
         }
-
-        /* TODO Category
-        if (updateEventUserRequest.hasCategory()) {} */
-
         if (updateEventUserRequest.hasEventDate()) {
             event.setEventDate(updateEventUserRequest.getEventDate());
         }
-
         if (updateEventUserRequest.hasLocation()) {
             Location location = new Location();
             location.setLat(updateEventUserRequest.getLocation().getLat());
@@ -138,10 +121,6 @@ public class EventMapper {
         if (updateEventAdminRequest.hasDescription()) {
             event.setDescription(updateEventAdminRequest.getDescription());
         }
-
-        /* TODO Category
-        if (updateEventAdminRequest.hasCategory()) {} */
-
         if (updateEventAdminRequest.hasEventDate()) {
             event.setEventDate(updateEventAdminRequest.getEventDate());
         }

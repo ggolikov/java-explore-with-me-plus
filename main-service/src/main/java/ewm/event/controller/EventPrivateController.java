@@ -5,6 +5,7 @@ import ewm.event.dto.EventShortDto;
 import ewm.event.dto.NewEventDto;
 import ewm.event.dto.UpdateEventUserRequest;
 import ewm.event.service.EventService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -13,25 +14,25 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/users")
+@RequestMapping("/users/{userId}/events")
 public class EventPrivateController {
     private final EventService eventService;
 
-    @PostMapping("/{userId}/events")
+    @PostMapping()
     @ResponseStatus(HttpStatus.CREATED)
     public EventFullDto create(@PathVariable Long userId,
-                               @RequestBody NewEventDto newEventDto) {
+                               @RequestBody @Valid NewEventDto newEventDto) {
         return eventService.create(userId, newEventDto);
     }
 
-    @GetMapping("/{userId}/events/{eventId}")
+    @GetMapping("/{eventId}")
     @ResponseStatus(HttpStatus.OK)
     public EventFullDto get(@PathVariable Long userId,
                             @PathVariable Long eventId) {
         return eventService.get(userId, eventId);
     }
 
-    @GetMapping("/{userId}/events")
+    @GetMapping()
     @ResponseStatus(HttpStatus.OK)
     public List<EventShortDto> getEvents(@PathVariable Long userId,
                                          @RequestParam(defaultValue = "0") int from,
@@ -39,11 +40,11 @@ public class EventPrivateController {
         return eventService.getEvents(userId, from, size);
     }
 
-    @PatchMapping("/{userId}/events/{eventId}")
+    @PatchMapping("/{eventId}")
     @ResponseStatus(HttpStatus.OK)
     public EventFullDto update(@PathVariable Long userId,
                                @PathVariable Long eventId,
-                               @RequestBody UpdateEventUserRequest updateEventUserRequest) {
+                               @RequestBody @Valid UpdateEventUserRequest updateEventUserRequest) {
         return eventService.update(userId, eventId, updateEventUserRequest);
     }
 }
