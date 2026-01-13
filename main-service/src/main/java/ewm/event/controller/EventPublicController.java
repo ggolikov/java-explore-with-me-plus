@@ -4,6 +4,7 @@ import ewm.event.dto.EventFullDto;
 import ewm.event.dto.EventShortDto;
 import ewm.event.model.EventSort;
 import ewm.event.service.EventService;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.constraints.PositiveOrZero;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -21,14 +22,14 @@ public class EventPublicController {
 
     @GetMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
-    public EventFullDto getPublicEvent(@PathVariable("id") Long eventId) {
-        return eventService.getPublicEvent(eventId);
+    public EventFullDto getPublicEvent(@PathVariable("id") Long eventId, HttpServletRequest request) {
+        return eventService.getPublicEvent(eventId, request);
     }
 
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
     public List<EventShortDto> getPublicEvents(@RequestParam(required = false) String text,
-                                               @RequestParam(required = false) List<Integer> categories,
+                                               @RequestParam(required = false) List<Long> categories,
                                                @RequestParam(required = false) Boolean paid,
                                                @RequestParam(required = false)
                                                @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime rangeStart,
@@ -37,8 +38,9 @@ public class EventPublicController {
                                                @RequestParam(defaultValue = "false") Boolean onlyAvailable,
                                                @RequestParam(required = false) EventSort sort,
                                                @RequestParam(defaultValue = "0") @PositiveOrZero int from,
-                                               @RequestParam(defaultValue = "10") @PositiveOrZero int size) {
+                                               @RequestParam(defaultValue = "10") @PositiveOrZero int size,
+                                               HttpServletRequest request) {
         return eventService.getPublicEvents(text, categories, paid, rangeStart, rangeEnd, onlyAvailable, sort, from,
-                size);
+                size, request);
     }
 }

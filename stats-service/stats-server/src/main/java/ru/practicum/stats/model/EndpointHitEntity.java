@@ -12,6 +12,7 @@ import java.time.LocalDateTime;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@ToString
 public class EndpointHitEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

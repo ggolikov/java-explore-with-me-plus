@@ -7,10 +7,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(
-        name = "users",
-        uniqueConstraints = @UniqueConstraint(name = "uq_user_email", columnNames = "email")
-)
+@Table(name = "users")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -18,6 +15,7 @@ import lombok.Setter;
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "user_id")
     private Long id;
 
     @Column(nullable = false, length = 250)

@@ -21,10 +21,7 @@ public class EventMapper {
         event.setTitle(eventDto.getTitle());
         event.setAnnotation(eventDto.getAnnotation());
         event.setDescription(eventDto.getDescription());
-
-        // TODO Category
         event.setCategory(category);
-
         event.setEventDate(eventDto.getEventDate());
         Location location = new Location();
         location.setLat(eventDto.getLocation().getLat());
@@ -42,10 +39,7 @@ public class EventMapper {
         eventFullDto.setTitle(event.getTitle());
         eventFullDto.setAnnotation(event.getAnnotation());
         eventFullDto.setDescription(event.getDescription());
-
-        // TODO Category
         eventFullDto.setCategory(CategoryMapper.toDto(event.getCategory()));
-
         eventFullDto.setCreatedOn(event.getCreatedOn());
         eventFullDto.setEventDate(event.getEventDate());
         eventFullDto.setPublishedOn(event.getPublishedOn());
@@ -62,8 +56,6 @@ public class EventMapper {
         // TODO Request
         eventFullDto.setConfirmedRequests(event.getConfirmedRequests());
 
-        // FIXME use stat-svc
-        event.setViews(0L);
         return eventFullDto;
     }
 
@@ -72,8 +64,6 @@ public class EventMapper {
         eventShortDto.setId(event.getId());
         eventShortDto.setTitle(event.getTitle());
         eventShortDto.setAnnotation(event.getAnnotation());
-
-        // TODO Category
         eventShortDto.setCategory(CategoryMapper.toDto(event.getCategory()));
 
         // TODO Request
@@ -82,10 +72,6 @@ public class EventMapper {
         eventShortDto.setEventDate(event.getEventDate());
         eventShortDto.setInitiator(UserMapper.toShortDto(event.getInitiator()));
         eventShortDto.setPaid(event.getPaid());
-
-        // FIXME use stat-svc
-        eventShortDto.setViews(0L);
-
         return eventShortDto;
     }
 
@@ -99,14 +85,9 @@ public class EventMapper {
         if (updateEventUserRequest.hasDescription()) {
             event.setDescription(updateEventUserRequest.getDescription());
         }
-
-        /* TODO Category
-        if (updateEventUserRequest.hasCategory()) {} */
-
         if (updateEventUserRequest.hasEventDate()) {
             event.setEventDate(updateEventUserRequest.getEventDate());
         }
-
         if (updateEventUserRequest.hasLocation()) {
             Location location = new Location();
             location.setLat(updateEventUserRequest.getLocation().getLat());
@@ -140,10 +121,6 @@ public class EventMapper {
         if (updateEventAdminRequest.hasDescription()) {
             event.setDescription(updateEventAdminRequest.getDescription());
         }
-
-        /* TODO Category
-        if (updateEventAdminRequest.hasCategory()) {} */
-
         if (updateEventAdminRequest.hasEventDate()) {
             event.setEventDate(updateEventAdminRequest.getEventDate());
         }
