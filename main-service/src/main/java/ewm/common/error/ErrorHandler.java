@@ -4,6 +4,7 @@ import ewm.common.dto.ApiError;
 import ewm.common.exception.BadRequestException;
 import ewm.common.exception.ConflictException;
 import ewm.common.exception.NotFoundException;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -12,6 +13,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.time.LocalDateTime;
 
+@Slf4j
 @RestControllerAdvice
 public class ErrorHandler {
     @ExceptionHandler(NotFoundException.class)
@@ -43,5 +45,11 @@ public class ErrorHandler {
                 .timestamp(LocalDateTime.now())
                 .build();
         return new ResponseEntity<>(error, status);
+    }
+
+    @ExceptionHandler(Throwable.class)
+    public ResponseEntity<ApiError> handleOther(Throwable ex) {
+        log.error("Unhandled error", ex);
+        return buildError(ex.getMessage(), "Internal server error.", HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }

@@ -40,7 +40,7 @@ public class ParticipationRequestServiceImpl implements ParticipationRequestServ
         Event event = eventRepo.findById(eventId)
                 .orElseThrow(() -> new NotFoundException("Event not found: " + eventId));
 
-        if (Objects.equals(event.getInitiator().getId(), userId)) {
+        if (Objects.equals(event.getInitiator().getUserId(), userId)) {
             throw new ConflictException("Initiator cannot request own event");
         }
         if (event.getState() != EventState.PUBLISHED) {
@@ -102,7 +102,7 @@ public class ParticipationRequestServiceImpl implements ParticipationRequestServ
     public List<ParticipationRequestDto> getEventRequests(Long userId, Long eventId) {
         Event event = eventRepo.findById(eventId)
                 .orElseThrow(() -> new NotFoundException("Event not found: " + eventId));
-        if (!Objects.equals(event.getInitiator().getId(), userId)) {
+        if (!Objects.equals(event.getInitiator().getUserId(), userId)) {
             throw new ConflictException("Only initiator can view event requests");
         }
         return requestRepo.findAllByEventId(eventId).stream()
@@ -121,7 +121,7 @@ public class ParticipationRequestServiceImpl implements ParticipationRequestServ
         Event event = eventRepo.findById(eventId)
                 .orElseThrow(() -> new NotFoundException("Event not found: " + eventId));
 
-        if (!Objects.equals(event.getInitiator().getId(), userId)) {
+        if (!Objects.equals(event.getInitiator().getUserId(), userId)) {
             throw new ConflictException("Only initiator can update requests");
         }
 
