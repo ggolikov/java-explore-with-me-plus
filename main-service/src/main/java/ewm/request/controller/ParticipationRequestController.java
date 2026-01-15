@@ -6,6 +6,7 @@ import ewm.request.dto.ParticipationRequestDto;
 import ewm.request.service.ParticipationRequestService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -18,6 +19,7 @@ public class ParticipationRequestController {
     private final ParticipationRequestService service;
 
     @PostMapping("/{userId}/requests")
+    @ResponseStatus(HttpStatus.CREATED)
     public ParticipationRequestDto create(@PathVariable Long userId,
                                           @RequestParam Long eventId) {
         return service.create(userId, eventId);

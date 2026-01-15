@@ -61,13 +61,21 @@ public class ParticipationRequestServiceImpl implements ParticipationRequestServ
         req.setRequester(user);
         req.setEvent(event);
 
-        boolean moderation = event.getRequestModeration();
-        if (!moderation && (limit == 0 || confirmed < limit)) {
-            req.setStatus(RequestStatus.CONFIRMED);
-            event.setConfirmedRequests(confirmed + 1);
+//        boolean moderation = event.getRequestModeration();
+//        if (!moderation && (limit == 0 || confirmed < limit)) {
+//            req.setStatus(RequestStatus.CONFIRMED);
+//            event.setConfirmedRequests(confirmed + 1);
+//        } else {
+//            req.setStatus(RequestStatus.PENDING);
+//        }
+
+        RequestStatus status;
+        if (event.getParticipantLimit() == 0 || Boolean.FALSE.equals(event.getRequestModeration())) {
+            status = RequestStatus.CONFIRMED;
         } else {
-            req.setStatus(RequestStatus.PENDING);
+            status = RequestStatus.PENDING;
         }
+        req.setStatus(status);
 
         ParticipationRequest saved = requestRepo.save(req);
         return ParticipationRequestMapper.toDto(saved);
