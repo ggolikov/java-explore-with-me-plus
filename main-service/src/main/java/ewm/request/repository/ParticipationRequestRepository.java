@@ -32,6 +32,7 @@ public interface ParticipationRequestRepository extends JpaRepository<Participat
 
     interface EventConfirmedCount {
         Long getEventId();
+        
         Long getCnt();
     }
 
