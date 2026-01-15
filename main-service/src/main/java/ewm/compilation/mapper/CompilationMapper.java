@@ -4,8 +4,6 @@ import ewm.compilation.dto.CompilationDto;
 import ewm.compilation.model.Compilation;
 import ewm.event.mapper.EventMapper;
 
-import java.util.stream.Collectors;
-
 public class CompilationMapper {
 
     public static CompilationDto toDto(Compilation c) {
