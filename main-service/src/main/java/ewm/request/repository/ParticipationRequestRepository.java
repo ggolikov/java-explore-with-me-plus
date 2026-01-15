@@ -1,6 +1,7 @@
 package ewm.request.repository;
 
 import ewm.request.model.ParticipationRequest;
+import ewm.request.model.RequestStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -33,4 +34,7 @@ public interface ParticipationRequestRepository extends JpaRepository<Participat
         Long getEventId();
         Long getCnt();
     }
+
+    long countByEventIdAndStatus(Long eventId, RequestStatus status);
+
 }

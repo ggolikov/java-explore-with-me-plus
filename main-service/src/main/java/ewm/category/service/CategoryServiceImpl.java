@@ -9,14 +9,18 @@ import ewm.common.exception.ConflictException;
 import ewm.common.exception.NotFoundException;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import ewm.event.repository.DatabaseEventRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
 public class CategoryServiceImpl implements CategoryService {
     private final CategoryRepository categoryRepository;
+    private final DatabaseEventRepository eventRepository;
 
     @Override
     public CategoryDto create(NewCategoryDto dto) {
@@ -28,22 +32,31 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
-    public CategoryDto update(Long id, CategoryDto dto) {
+    public CategoryDto update(Long id, NewCategoryDto dto) {
         Category category = categoryRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Категория с id=" + id + " не была найдена"));
+
         if (!category.getName().equalsIgnoreCase(dto.getName())
                 && categoryRepository.existsByNameIgnoreCase(dto.getName())) {
             throw new ConflictException("Название категории должно быть уникальным");
         }
-        CategoryMapper.update(category, dto);
+
+        category.setName(dto.getName());
         return CategoryMapper.toDto(categoryRepository.save(category));
     }
 
     @Override
+    @Transactional
     public void delete(Long id) {
         Category category = categoryRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Категория с id=" + id + " не была найдена"));
+
+        if (eventRepository.existsByCategoryId(id)) {
+            throw new ConflictException("Category is not empty");
+        }
+
         categoryRepository.delete(category);
+        categoryRepository.flush();
     }
 
     @Override

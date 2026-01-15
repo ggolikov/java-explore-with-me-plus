@@ -1,5 +1,6 @@
 package ewm.compilation.dto;
 
+import jakarta.validation.constraints.Size;
 import lombok.*;
 
 import java.util.Set;
@@ -11,6 +12,7 @@ import java.util.Set;
 @AllArgsConstructor
 @Builder
 public class UpdateCompilationRequest {
+    @Size(max = 50)
     private String title;
     private Boolean pinned;
     private Set<Long> events;

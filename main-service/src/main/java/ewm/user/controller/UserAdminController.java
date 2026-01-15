@@ -3,6 +3,7 @@ package ewm.user.controller;
 import ewm.user.dto.NewUserRequest;
 import ewm.user.dto.UserDto;
 import ewm.user.service.UserService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -18,7 +19,7 @@ public class UserAdminController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public UserDto registerUser(@RequestBody NewUserRequest request) {
+    public UserDto registerUser(@Valid @RequestBody NewUserRequest request) {
         return userService.create(request);
     }
 

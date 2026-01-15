@@ -59,7 +59,7 @@ public class ErrorHandler {
 
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ResponseEntity<ApiError> handleDataIntegrityViolation(DataIntegrityViolationException ex) {
-        return buildError(ex.getMessage(), "Некорректный запрос", HttpStatus.BAD_REQUEST);
+        return buildError(ex.getMessage(), "Некорректный запрос", HttpStatus.CONFLICT);
     }
 
     @ExceptionHandler(BadRequestException.class)

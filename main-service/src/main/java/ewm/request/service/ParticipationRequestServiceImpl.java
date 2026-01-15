@@ -77,6 +77,14 @@ public class ParticipationRequestServiceImpl implements ParticipationRequestServ
         }
         req.setStatus(status);
 
+        // если автоподтверждение и лимит > 0 — повторная защита от гонки
+        if (status == RequestStatus.CONFIRMED && limit > 0) {
+            long confirmedAfter = requestRepo.countByEventIdAndStatus(eventId, RequestStatus.CONFIRMED);
+            if (confirmedAfter >= limit) {
+                throw new ConflictException("Participant limit reached");
+            }
+        }
+
         ParticipationRequest saved = requestRepo.save(req);
         return ParticipationRequestMapper.toDto(saved);
     }
@@ -162,11 +170,7 @@ public class ParticipationRequestServiceImpl implements ParticipationRequestServ
         long confirmed = event.getConfirmedRequests();
 
         if (limit > 0 && confirmed >= limit) {
-            for (ParticipationRequest r : requests) {
-                r.setStatus(RequestStatus.REJECTED);
-                rejectedOut.add(r);
-            }
-            return toResult(confirmedOut, rejectedOut);
+            throw new ConflictException("Participant limit reached");
         }
 
         long slots = (limit == 0) ? Long.MAX_VALUE : (limit - confirmed);
