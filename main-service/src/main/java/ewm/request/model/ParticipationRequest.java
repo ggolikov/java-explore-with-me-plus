@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 
 @Entity
 @Table(
@@ -46,7 +47,7 @@ public class ParticipationRequest {
     @PrePersist
     void onCreate() {
         if (created == null) {
-            created = LocalDateTime.now();
+            created = LocalDateTime.now().truncatedTo(ChronoUnit.MICROS);
         }
         if (status == null) {
             status = RequestStatus.PENDING;

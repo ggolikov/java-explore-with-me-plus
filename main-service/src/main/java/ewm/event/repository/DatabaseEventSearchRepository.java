@@ -28,7 +28,7 @@ public class DatabaseEventSearchRepository {
         BooleanBuilder builder = new BooleanBuilder();
 
         if (users != null && !users.isEmpty()) {
-            builder.and(event.initiator.id.in(users));
+            builder.and(event.initiator.userId.in(users));
         }
 
         if (states != null && !states.isEmpty()) {
@@ -83,7 +83,9 @@ public class DatabaseEventSearchRepository {
             builder.and(event.paid.eq(paid));
         }
 
-        builder.and(event.eventDate.goe(rangeStart));
+        if (rangeStart != null) {
+            builder.and(event.eventDate.goe(rangeStart));
+        }
 
         if (rangeEnd != null) {
             builder.and(event.eventDate.loe(rangeEnd));

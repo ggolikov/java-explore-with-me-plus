@@ -14,6 +14,7 @@ import ewm.event.model.EventState;
 import ewm.event.model.EventStateActionAdmin;
 import ewm.event.repository.DatabaseEventSearchRepository;
 import ewm.event.repository.EventRepository;
+import ewm.request.repository.ParticipationRequestRepository;
 import ewm.user.model.User;
 import ewm.user.repository.UserRepository;
 import jakarta.servlet.http.HttpServletRequest;
@@ -39,6 +40,7 @@ public class EventServiceImpl implements EventService {
     private final DatabaseEventSearchRepository  databaseEventSearchRepository;
     private final CategoryRepository categoryRepository;
     private final StatsClient statsClient;
+    private final ParticipationRequestRepository participationRequestRepository;
 
     @Override
     public EventFullDto create(Long userId, NewEventDto eventDto) {
@@ -64,8 +66,8 @@ public class EventServiceImpl implements EventService {
     public EventFullDto get(Long userId, Long eventId) {
         Event event = eventRepository.findById(eventId)
                 .orElseThrow(() -> new NotFoundException("Event not found"));
-        if (!event.getInitiator().getId().equals(userId)) {
-            throw new BadRequestException("User is not the initiator");
+        if (!event.getInitiator().getUserId().equals(userId)) {
+            throw new NotFoundException("Event not found");
         }
 
         List<Event> eventList = List.of(event);
@@ -110,7 +112,7 @@ public class EventServiceImpl implements EventService {
 
         Pageable page = PageRequest.of(from / size, size);
 
-        List<Event> eventList = eventRepository.findByInitiatorId(userId, page);
+        List<Event> eventList = eventRepository.findByInitiatorUserId(userId, page);
 
         return this.mapToEventShortDto(eventList);
     }
@@ -126,32 +128,35 @@ public class EventServiceImpl implements EventService {
                                                int from,
                                                int size,
                                                HttpServletRequest request) {
+
+        if (rangeStart == null) rangeStart = LocalDateTime.now();
+        if (rangeEnd != null && rangeEnd.isBefore(rangeStart)) {
+            throw new BadRequestException("Range start must be before rangeEnd");
+        }
+
+        // Pageable: сортировка только по eventDate, не по views
         Pageable page;
-        if (sort != null) {
-            Sort sortBy = null;
-            if (sort.equals(EventSort.EVENT_DATE)) {
-                sortBy = Sort.by(Sort.Direction.DESC, "eventDate");
-            } else if (sort.equals(EventSort.VIEWS)) {
-                sortBy = Sort.by(Sort.Direction.DESC, "views");
-            }
-            page = PageRequest.of(from / size, size, sortBy);
+        if (sort == EventSort.EVENT_DATE) {
+            page = PageRequest.of(from / size, size, Sort.by(Sort.Direction.DESC, "eventDate"));
         } else {
             page = PageRequest.of(from / size, size);
         }
-        if (rangeStart == null) {
-            rangeStart = LocalDateTime.now();
-        }
-        if (rangeEnd != null && rangeEnd.isBefore(rangeStart)) {
-            throw new BadRequestException("Range start date is before end date");
-        }
+
         registerHit(request);
 
-        List<Event> eventList = databaseEventSearchRepository.findPublicEvents(text, categories, paid, rangeStart,
-                rangeEnd,
-                onlyAvailable, page);
+        List<Event> eventList = databaseEventSearchRepository.findPublicEvents(
+                text, categories, paid, rangeStart, rangeEnd, onlyAvailable, page
+        );
 
-        return this.mapToEventShortDto(eventList);
+        List<EventShortDto> dtos = mapToEventShortDto(eventList);
+
+        if (sort == EventSort.VIEWS) {
+            dtos.sort(Comparator.comparingLong(EventShortDto::getViews).reversed());
+        }
+
+        return dtos;
     }
+
 
     @Override
     public EventFullDto update(Long userId, Long eventId, UpdateEventUserRequest updateEventUserRequest) {
@@ -162,7 +167,7 @@ public class EventServiceImpl implements EventService {
             throw new ConflictException("Event is already published");
         }
 
-        if (!currentEvent.getInitiator().getId().equals(userId)) {
+        if (!currentEvent.getInitiator().getUserId().equals(userId)) {
             throw new BadRequestException("User not allowed to update event");
         }
 
@@ -240,45 +245,78 @@ public class EventServiceImpl implements EventService {
     }
 
     private Map<Long, Integer> getEventsViews(List<Event> eventList) {
+        if (eventList == null || eventList.isEmpty()) return Map.of();
+
         List<String> uris = eventList.stream()
                 .map(e -> "/events/" + e.getId())
                 .toList();
 
         LocalDateTime start = eventList.stream()
                 .map(Event::getCreatedOn)
+                .filter(java.util.Objects::nonNull)
                 .min(Comparator.naturalOrder())
-                .orElse(null);
+                .orElse(LocalDateTime.now().minusYears(1));
+
         LocalDateTime end = LocalDateTime.now();
 
-        List<ViewStatsDto> stats = statsClient.getStats(start, end, uris, true);
+        try {
+            List<ViewStatsDto> stats = statsClient.getStats(start, end, uris, true);
 
-        Map<Long, Integer> map = new HashMap<>();
-        for (ViewStatsDto s : stats) {
-            map.put(Long.parseLong(s.getUri().split("/")[2]), Long.valueOf(s.getHits()).intValue());
+            Map<Long, Integer> map = new HashMap<>();
+            for (ViewStatsDto s : stats) {
+                String[] parts = s.getUri().split("/");
+                if (parts.length >= 3) {
+                    long eventId = Long.parseLong(parts[2]);
+                    map.put(eventId, (int) s.getHits());
+                }
+            }
+            return map;
+        } catch (Exception ex) {
+            // критично: не роняем эндпоинт
+            return Map.of();
         }
-
-        return map;
     }
 
     private List<EventFullDto> mapToEventFullDto(List<Event> eventList) {
-        Map<Long, Integer> eventsViews = this.getEventsViews(eventList);
+        Map<Long, Integer> views = getEventsViews(eventList);
+        Map<Long, Long> confirmed = getConfirmedRequests(eventList);
 
         return eventList.stream()
-                .map(EventMapper::mapToEventFullDto)
-                .peek(efo -> {
-                    efo.setViews(eventsViews.getOrDefault(efo.getId(), 0).longValue());
-                })
+                .map(e -> EventMapper.mapToEventFullDto(
+                        e,
+                        views.getOrDefault(e.getId(), 0),
+                        confirmed.getOrDefault(e.getId(), 0L)
+                ))
                 .toList();
     }
 
+
+    private Map<Long, Long> getConfirmedRequests(List<Event> eventList) {
+        if (eventList == null || eventList.isEmpty()) return Map.of();
+
+        List<Long> ids = eventList.stream()
+                .map(Event::getId)
+                .toList();
+
+        Map<Long, Long> map = new HashMap<>();
+        for (ParticipationRequestRepository.EventConfirmedCount row
+                : participationRequestRepository.countConfirmedByEventIds(ids)) {
+            map.put(row.getEventId(), row.getCnt());
+        }
+        return map;
+    }
+
+
     private List<EventShortDto> mapToEventShortDto(List<Event> eventList) {
-        Map<Long, Integer> eventsViews = this.getEventsViews(eventList);
+        Map<Long, Integer> views = getEventsViews(eventList);
+        Map<Long, Long> confirmed = getConfirmedRequests(eventList);
 
         return eventList.stream()
-                .map(EventMapper::mapToEventShortDto)
-                .peek(efo -> {
-                    efo.setViews(eventsViews.getOrDefault(efo.getId(), 0).longValue());
-                })
+                .map(e -> EventMapper.mapToEventShortDto(
+                        e,
+                        views.getOrDefault(e.getId(), 0),
+                        confirmed.getOrDefault(e.getId(), 0L)
+                ))
                 .toList();
     }
 }

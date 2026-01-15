@@ -40,13 +40,13 @@ public class ParticipationRequestServiceImpl implements ParticipationRequestServ
         Event event = eventRepo.findById(eventId)
                 .orElseThrow(() -> new NotFoundException("Event not found: " + eventId));
 
-        if (Objects.equals(event.getInitiator().getId(), userId)) {
+        if (Objects.equals(event.getInitiator().getUserId(), userId)) {
             throw new ConflictException("Initiator cannot request own event");
         }
         if (event.getState() != EventState.PUBLISHED) {
             throw new ConflictException("Event not published");
         }
-        if (requestRepo.existsByEventIdAndRequesterId(eventId, userId)) {
+        if (requestRepo.existsByEventIdAndRequesterUserId(eventId, userId)) {
             throw new ConflictException("Duplicate request");
         }
 
@@ -61,12 +61,28 @@ public class ParticipationRequestServiceImpl implements ParticipationRequestServ
         req.setRequester(user);
         req.setEvent(event);
 
-        boolean moderation = event.getRequestModeration();
-        if (!moderation && (limit == 0 || confirmed < limit)) {
-            req.setStatus(RequestStatus.CONFIRMED);
-            event.setConfirmedRequests(confirmed + 1);
+//        boolean moderation = event.getRequestModeration();
+//        if (!moderation && (limit == 0 || confirmed < limit)) {
+//            req.setStatus(RequestStatus.CONFIRMED);
+//            event.setConfirmedRequests(confirmed + 1);
+//        } else {
+//            req.setStatus(RequestStatus.PENDING);
+//        }
+
+        RequestStatus status;
+        if (event.getParticipantLimit() == 0 || Boolean.FALSE.equals(event.getRequestModeration())) {
+            status = RequestStatus.CONFIRMED;
         } else {
-            req.setStatus(RequestStatus.PENDING);
+            status = RequestStatus.PENDING;
+        }
+        req.setStatus(status);
+
+        // если автоподтверждение и лимит > 0 — повторная защита от гонки
+        if (status == RequestStatus.CONFIRMED && limit > 0) {
+            long confirmedAfter = requestRepo.countByEventIdAndStatus(eventId, RequestStatus.CONFIRMED);
+            if (confirmedAfter >= limit) {
+                throw new ConflictException("Participant limit reached");
+            }
         }
 
         ParticipationRequest saved = requestRepo.save(req);
@@ -76,7 +92,7 @@ public class ParticipationRequestServiceImpl implements ParticipationRequestServ
     @Override
     @Transactional
     public ParticipationRequestDto cancel(Long userId, Long requestId) {
-        ParticipationRequest req = requestRepo.findByIdAndRequesterId(requestId, userId)
+        ParticipationRequest req = requestRepo.findByIdAndRequesterUserId(requestId, userId)
                 .orElseThrow(() -> new NotFoundException("Request not found: " + requestId));
 
         if (req.getStatus() == RequestStatus.CONFIRMED) {
@@ -92,7 +108,7 @@ public class ParticipationRequestServiceImpl implements ParticipationRequestServ
     @Transactional(readOnly = true)
     public List<ParticipationRequestDto> getUserRequests(Long userId) {
         ensureUserExists(userId);
-        return requestRepo.findAllByRequesterId(userId).stream()
+        return requestRepo.findAllByRequesterUserId(userId).stream()
                 .map(ParticipationRequestMapper::toDto)
                 .collect(Collectors.toList());
     }
@@ -102,7 +118,7 @@ public class ParticipationRequestServiceImpl implements ParticipationRequestServ
     public List<ParticipationRequestDto> getEventRequests(Long userId, Long eventId) {
         Event event = eventRepo.findById(eventId)
                 .orElseThrow(() -> new NotFoundException("Event not found: " + eventId));
-        if (!Objects.equals(event.getInitiator().getId(), userId)) {
+        if (!Objects.equals(event.getInitiator().getUserId(), userId)) {
             throw new ConflictException("Only initiator can view event requests");
         }
         return requestRepo.findAllByEventId(eventId).stream()
@@ -121,7 +137,7 @@ public class ParticipationRequestServiceImpl implements ParticipationRequestServ
         Event event = eventRepo.findById(eventId)
                 .orElseThrow(() -> new NotFoundException("Event not found: " + eventId));
 
-        if (!Objects.equals(event.getInitiator().getId(), userId)) {
+        if (!Objects.equals(event.getInitiator().getUserId(), userId)) {
             throw new ConflictException("Only initiator can update requests");
         }
 
@@ -154,11 +170,7 @@ public class ParticipationRequestServiceImpl implements ParticipationRequestServ
         long confirmed = event.getConfirmedRequests();
 
         if (limit > 0 && confirmed >= limit) {
-            for (ParticipationRequest r : requests) {
-                r.setStatus(RequestStatus.REJECTED);
-                rejectedOut.add(r);
-            }
-            return toResult(confirmedOut, rejectedOut);
+            throw new ConflictException("Participant limit reached");
         }
 
         long slots = (limit == 0) ? Long.MAX_VALUE : (limit - confirmed);
