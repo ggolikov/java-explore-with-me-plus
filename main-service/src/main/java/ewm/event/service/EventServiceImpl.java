@@ -112,7 +112,7 @@ public class EventServiceImpl implements EventService {
 
         Pageable page = PageRequest.of(from / size, size);
 
-        List<Event> eventList = eventRepository.findByInitiatorId(userId, page);
+        List<Event> eventList = eventRepository.findByInitiatorUserId(userId, page);
 
         return this.mapToEventShortDto(eventList);
     }

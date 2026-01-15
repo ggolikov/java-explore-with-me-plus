@@ -46,7 +46,7 @@ public class ParticipationRequestServiceImpl implements ParticipationRequestServ
         if (event.getState() != EventState.PUBLISHED) {
             throw new ConflictException("Event not published");
         }
-        if (requestRepo.existsByEventIdAndRequesterId(eventId, userId)) {
+        if (requestRepo.existsByEventIdAndRequesterUserId(eventId, userId)) {
             throw new ConflictException("Duplicate request");
         }
 
@@ -76,7 +76,7 @@ public class ParticipationRequestServiceImpl implements ParticipationRequestServ
     @Override
     @Transactional
     public ParticipationRequestDto cancel(Long userId, Long requestId) {
-        ParticipationRequest req = requestRepo.findByIdAndRequesterId(requestId, userId)
+        ParticipationRequest req = requestRepo.findByIdAndRequesterUserId(requestId, userId)
                 .orElseThrow(() -> new NotFoundException("Request not found: " + requestId));
 
         if (req.getStatus() == RequestStatus.CONFIRMED) {
@@ -92,7 +92,7 @@ public class ParticipationRequestServiceImpl implements ParticipationRequestServ
     @Transactional(readOnly = true)
     public List<ParticipationRequestDto> getUserRequests(Long userId) {
         ensureUserExists(userId);
-        return requestRepo.findAllByRequesterId(userId).stream()
+        return requestRepo.findAllByRequesterUserId(userId).stream()
                 .map(ParticipationRequestMapper::toDto)
                 .collect(Collectors.toList());
     }
