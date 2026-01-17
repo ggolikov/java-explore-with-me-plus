@@ -23,6 +23,7 @@ public class CategoryServiceImpl implements CategoryService {
     private final DatabaseEventRepository eventRepository;
 
     @Override
+    @Transactional
     public CategoryDto create(NewCategoryDto dto) {
         if (categoryRepository.existsByNameIgnoreCase(dto.getName())) {
             throw new ConflictException("Название категории должно быть уникальным");
@@ -32,6 +33,7 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
+    @Transactional
     public CategoryDto update(Long id, NewCategoryDto dto) {
         Category category = categoryRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Категория с id=" + id + " не была найдена"));
@@ -60,6 +62,7 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<CategoryDto> findAll(int from, int size) {
         PageRequest page = PageRequest.of(from / size, size);
         return categoryRepository.findAll(page).stream()
@@ -68,6 +71,7 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public CategoryDto findById(Long id) {
         Category category = categoryRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Категория с id=" + id + " не была найдена"));

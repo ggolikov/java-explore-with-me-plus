@@ -28,6 +28,7 @@ public class CompilationServiceImpl implements CompilationService {
     private final DatabaseEventRepository eventRepository;
 
     @Override
+    @Transactional
     public CompilationDto create(NewCompilationDto dto) {
         Compilation comp = new Compilation();
         comp.setTitle(dto.getTitle());
@@ -41,6 +42,7 @@ public class CompilationServiceImpl implements CompilationService {
     }
 
     @Override
+    @Transactional
     public CompilationDto update(Long compId, UpdateCompilationRequest dto) {
         Compilation comp = compilationRepository.findById(compId)
                 .orElseThrow(() -> new NotFoundException("Compilation not found: " + compId));
@@ -60,6 +62,7 @@ public class CompilationServiceImpl implements CompilationService {
     }
 
     @Override
+    @Transactional
     public void delete(Long compId) {
         if (!compilationRepository.existsById(compId)) {
             throw new NotFoundException("Compilation not found: " + compId);
