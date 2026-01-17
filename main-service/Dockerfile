@@ -24,8 +24,6 @@ FROM eclipse-temurin:21-jre
 WORKDIR /app
 
 # Copy the final jar (adjust path if needed)
-COPY --from=builder /build/main-service/target/*jar app.jar
-
-EXPOSE 8080
+COPY main-service/target/main-service-0.0.1-SNAPSHOT.jar app.jar
 
 ENTRYPOINT ["java","-jar","app.jar"]

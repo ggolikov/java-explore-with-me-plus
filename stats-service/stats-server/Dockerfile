@@ -26,6 +26,5 @@ WORKDIR /app
 # Copy the final jar (adjust path if needed)
 COPY --from=builder /build/stats-service/stats-server/target/*jar app.jar
 
-EXPOSE 8080
 
 ENTRYPOINT ["java","-jar","app.jar"]
