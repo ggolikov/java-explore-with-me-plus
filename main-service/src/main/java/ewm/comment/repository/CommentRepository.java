@@ -18,7 +18,7 @@ public interface CommentRepository {
 
     List<Comment> findByAuthorId(Long authorId, Pageable page);
 
-    List<Comment> findAll(Pageable page);
+    List<Comment> findAll(Integer from, Integer size);
 
     List<Comment> findAllByStatus(CommentStatus status, Pageable page);
 

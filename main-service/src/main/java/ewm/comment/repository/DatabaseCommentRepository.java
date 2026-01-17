@@ -24,7 +24,7 @@ public interface DatabaseCommentRepository extends CommentRepository, JpaReposit
 
     @Override
     @Query("SELECT c FROM Comment c ORDER BY c.createdOn DESC")
-    List<Comment> findAll(Pageable page);
+    List<Comment> findAll(Integer from, Integer size);
 
     @Override
     @Query("SELECT c FROM Comment c WHERE c.status = :status ORDER BY c.createdOn DESC")
