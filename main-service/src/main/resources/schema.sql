@@ -40,13 +40,13 @@ CREATE TABLE IF NOT EXISTS participation_requests (
 );
 
 CREATE TABLE IF NOT EXISTS compilations (
-    compilation_id BIGSERIAL PRIMARY KEY,
+    id BIGSERIAL PRIMARY KEY,
     title VARCHAR(255) NOT NULL,
     pinned BOOLEAN DEFAULT FALSE
 );
 
 CREATE TABLE IF NOT EXISTS compilation_events (
-    compilation_id BIGINT NOT NULL REFERENCES compilations(compilation_id),
+    compilation_id BIGINT NOT NULL REFERENCES compilations(id),
     event_id BIGINT NOT NULL REFERENCES events,
     PRIMARY KEY (compilation_id, event_id)
 );
